@@ -1,8 +1,9 @@
-
 DROP DATABASE IF EXISTS SupplyDB;
 CREATE DATABASE SupplyDB;
 USE SupplyDB;
-
+DROP TABLE IF EXISTS CATALOG;
+DROP TABLE IF EXISTS PARTS;
+DROP TABLE IF EXISTS SUPPLIERS;
 
 CREATE TABLE Suppliers (
     SID    INT PRIMARY KEY,
@@ -25,13 +26,12 @@ CREATE TABLE Catalog (
     FOREIGN KEY (PID) REFERENCES Parts(PID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
 INSERT INTO Suppliers (SID, SNAME, CITY) VALUES
 (10001, 'Acme Widget', 'Bangalore'),
 (10002, 'Johns', 'Kolkata'),
 (10003, 'Vimal', 'Mumbai'),
 (10004, 'Reliance', 'Delhi');
-select * from supplier;
+ select *from Suppliers;
 
 INSERT INTO Parts (PID, PNAME, COLOR) VALUES
 (20001, 'Book', 'Red'),
@@ -39,7 +39,7 @@ INSERT INTO Parts (PID, PNAME, COLOR) VALUES
 (20003, 'Pencil', 'Green'),
 (20004, 'Mobile', 'Green'),
 (20005, 'Charger', 'Black');
-select * from parts;
+select * from Parts;
 
 INSERT INTO Catalog (SID, PID, COST) VALUES
 (10001,20001,10),
@@ -51,13 +51,11 @@ INSERT INTO Catalog (SID, PID, COST) VALUES
 (10002,20002,20),
 (10003,20003,30),
 (10004,20003,40);
-select *from catalog;
+select * from Catalog;
 
 SELECT DISTINCT p.PNAME
 FROM Parts p
 JOIN Catalog c ON p.PID = c.PID;
-
--- 4. Find the snames of suppliers who supply every part.
 
 SELECT s.SNAME
 FROM Suppliers s
@@ -65,7 +63,6 @@ JOIN Catalog c ON s.SID = c.SID
 GROUP BY s.SID, s.SNAME
 HAVING COUNT(DISTINCT c.PID) = (SELECT COUNT(*) FROM Parts);
 
--- 5. Find the snames of suppliers who supply every red part.
 
 SELECT s.SNAME
 FROM Suppliers s
@@ -75,7 +72,7 @@ WHERE p.COLOR = 'Red'
 GROUP BY s.SID, s.SNAME
 HAVING COUNT(DISTINCT c.PID) = (SELECT COUNT(*) FROM Parts WHERE COLOR = 'Red');
 
--- 6. Find the pnames of parts supplied by Acme Widget (SID 10001) and by no one else.
+
 SELECT p.PNAME
 FROM Parts p
 WHERE p.PID IN (
@@ -86,7 +83,6 @@ AND p.PID NOT IN (
 );
 
 
--- 7. Find the sids of suppliers who charge more for some part than the average cost of that part (averaged over all suppliers who supply that part).
 
 SELECT DISTINCT c.SID
 FROM Catalog c
@@ -98,7 +94,6 @@ JOIN (
 WHERE c.COST > avgc.avg_cost;
 
 
--- 8. For each part, find the sname of the supplier who charges the most for that part.
 
 SELECT p.PID, p.PNAME, s.SNAME, c.COST
 FROM Parts p
