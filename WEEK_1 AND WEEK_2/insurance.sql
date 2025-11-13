@@ -6,6 +6,12 @@ show databases;
 
 use Insurance;
 
+DROP TABLE IF EXISTS PARTICIPATED;
+DROP TABLE IF EXISTS OWNS;
+DROP TABLE IF EXISTS ACCIDENT;
+DROP TABLE IF EXISTS CAR;
+DROP TABLE IF EXISTS PERSON;
+
 create table person (driver_id varchar(10),
 name varchar(20),
 address varchar(30),
@@ -17,12 +23,12 @@ create table car(
   reg_num varchar(10),
   model varchar(10),
   year int, primary key(reg_num));
-  
+ 
 desc car;
-  
+ 
 create table accident(
-   report_num int, 
-   accident_date date, 
+   report_num int,
+   accident_date date,
    location varchar(20),
    primary key(report_num));
    
@@ -34,7 +40,7 @@ create table owns(
   primary key(driver_id, reg_num),
   foreign key(driver_id) references person(driver_id),
   foreign key(reg_num) references car(reg_num));
-  
+ 
 desc owns;
 
 create table participated(driver_id varchar(10), reg_num varchar(10),
@@ -102,37 +108,53 @@ INSERT INTO participated VALUES
 
 select * from participated;
 
-update participated set damage_amount=25000 where reg_num='KA053408' and report_num=12;
+UPDATE PARTICIPATED SET damage_amount=25000
+where reg_num='KA053408'
+and report_num=12;
 
+commit;
 select * from participated;
 
-INSERT INTO accident VALUES
-(16,'2008-03-15','Domlur');
+INSERT INTO ACCIDENT VALUES
+(16,'2008-03-15','DOMLUR');
+SELECT*FROM ACCIDENT;
 
-select * from accident;
-
-select accident_date, location
+SELECT accident_date,location
 from accident;
 
-select driver_id
-from PARTICIPATED
-where damage_amount >=25000;
+select driver_id from participated
+where damage_amount>=25000;
 
 select * from car order by year asc;
 
+select count(report_num) CNT from car c,participated p where c.reg_num=p.reg_num and
+model='Lancer';
 
-select count(report_num) CNT from car c,participated p where c.reg_num=p.reg_num and model='Lancer';
+select count(distinct driver_id) CNT from participated a, accident b where a.report_num=
+b.report_num and b.accident_date like '2008%';
 
-select count(distinct driverid) CNT from participated a, accident b where a.reportno= b.reportno and b.adate like '%08';
+select count(distinct driver_id) CNT from participated a, accident b where a.report_num=
+b.report_num and b.accident_date like '2008%';
 
-select count(distinct driver_id) CNT from participated a, accident b where a.report_num= b.report_num and b.accident_date like '%08';
 
-SELECT * FROM participated ORDER BY damage_amount DESC;
+SELECT * FROM PARTICIPATED ORDER BY DAMAGE_AMOUNT DESC;
 
-SELECT AVG(damage_amount) FROM participated;
+SELECT AVG(DAMAGE_AMOUNT) FROM PARTICIPATED;
 
-DELETE FROM participated WHERE damage_amount<(SELECT AVG (damage_amount) FROM participated); 
+DELETE FROM PARTICIPATED
+WHERE DAMAGE_AMOUNT < (
+    SELECT avg_damage
+    FROM (
+        SELECT AVG(DAMAGE_AMOUNT) AS avg_damage
+        FROM PARTICIPATED
+    ) AS temp
+);
+select *from participated;
 
-SELECT NAME FROM person A, participated B WHERE A.driver_id = B.driver_id AND damage_amount>(SELECT AVG(damage_amount) FROM participated);
 
-SELECT MAX(damage_amount) FROM participated;
+SELECT NAME FROM PERSON A, PARTICIPATED B WHERE A.DRIVER_ID = B.DRIVER_ID
+AND DAMAGE_AMOUNT>(SELECT AVG(DAMAGE_AMOUNT) FROM PARTICIPATED);
+
+
+SELECT MAX(DAMAGE_AMOUNT) FROM PARTICIPATED;
+
